@@ -1,0 +1,52 @@
+
+from HiggsAnalysis.CombinedLimit.PhysicsModel import *
+
+class CIlambda(PhysicsModel):
+    def __init__(self):
+        PhysicsModel.__init__(self)
+
+    def doParametersOfInterest(self):
+        self.modelBuilder.doVar('Beta[0,0,1]')
+        self.modelBuilder.doSet('POI','Beta')
+        
+        #dielectron_2017_BE_400
+        self.modelBuilder.factory_('expr::calcdielectron_2017_BE_400_Beta("945.403306677+2.77555756156e-07*@0+1569025.83993*@0*@0",Beta)')
+      
+        #dielectron_2017_BE_500
+        self.modelBuilder.factory_('expr::calcdielectron_2017_BE_500_Beta("581.638283319+10019.2335157*@0+1.7763568394e-06*@0*@0",Beta)')
+      
+        #dielectron_2017_BE_700
+        self.modelBuilder.factory_('expr::calcdielectron_2017_BE_700_Beta("188.827245964+3869.98700147*@0+1749836.2913*@0*@0",Beta)')
+      
+        #dielectron_2017_BE_1100
+        self.modelBuilder.factory_('expr::calcdielectron_2017_BE_1100_Beta("28.7796218285+1990.82594887*@0+952961.511736*@0*@0",Beta)')
+      
+        #dielectron_2017_BE_1900
+        self.modelBuilder.factory_('expr::calcdielectron_2017_BE_1900_Beta("1.34543286406+356.240590416*@0+271366.244505*@0*@0",Beta)')
+      
+        self.modelBuilder.out.Print()
+
+    def getYieldScale(self,bin,process):
+        print bin, process
+        
+        if bin == "dielectron_2017_BE_400":
+            print "dielectron_2017_BE_400 ConLL"
+            return 'calcdielectron_2017_BE_400_Beta' if self.DC.isSignal[process] else 1
+      
+        elif bin == "dielectron_2017_BE_500":
+            print "dielectron_2017_BE_500 ConLL"
+            return 'calcdielectron_2017_BE_500_Beta' if self.DC.isSignal[process] else 1
+      
+        elif bin == "dielectron_2017_BE_700":
+            print "dielectron_2017_BE_700 ConLL"
+            return 'calcdielectron_2017_BE_700_Beta' if self.DC.isSignal[process] else 1
+      
+        elif bin == "dielectron_2017_BE_1100":
+            print "dielectron_2017_BE_1100 ConLL"
+            return 'calcdielectron_2017_BE_1100_Beta' if self.DC.isSignal[process] else 1
+      
+        elif bin == "dielectron_2017_BE_1900":
+            print "dielectron_2017_BE_1900 ConLL"
+            return 'calcdielectron_2017_BE_1900_Beta' if self.DC.isSignal[process] else 1
+      
+CIlambda = CIlambda()

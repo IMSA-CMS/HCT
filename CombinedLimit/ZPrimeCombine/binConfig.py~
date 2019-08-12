@@ -1,0 +1,6 @@
+#!/bin/env python
+
+csbins = ["inc"]
+uncertainties = [""]
+binning = []
+binning.append["400,500,700,1100,1900,3500,10000"]

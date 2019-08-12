@@ -1,0 +1,8 @@
+#!/bin/bash
+
+array=("" "-do2016" "-do2018" )
+for i in "${array[@]}"
+do
+    python runFit.py $i
+done
+python runInterpretation.py -c testLimit -t test --CI -r -p --int -e --submit

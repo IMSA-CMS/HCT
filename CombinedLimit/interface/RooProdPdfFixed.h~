@@ -1,0 +1,17 @@
+#ifndef ROOPRODPDFFIXED_H
+#define ROOPRODPDFFIXED_H
+
+#include "RooProdPdf.h"
+
+class RooProdPdfFixed : public RooProdPdf
+{
+public:
+  Double_t getLogVal(const RooArgSet* set=0) const;
+
+private:
+  Double_t logEvaluate() const;
+
+  ClassDef(RooProdPdfFixed, 1)
+};
+
+#endif

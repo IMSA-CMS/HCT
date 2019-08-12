@@ -1,0 +1,17 @@
+#ifndef ROOPOISSONFIXED_H
+#define ROOPOISSONFIXED_H
+
+#include "RooPoisson.h"
+
+class RooArgSet;
+
+class RooPoissonFixed : public RooPoisson
+{
+public:
+  Double_t getLogVal(const RooArgSet* set=0) const;
+
+private:
+  ClassDef(RooPoissonFixed, 1)
+};
+
+#endif

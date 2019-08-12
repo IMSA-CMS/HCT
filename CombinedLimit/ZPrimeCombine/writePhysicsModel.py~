@@ -1,0 +1,96 @@
+import argparse
+import subprocess
+import time
+import ROOT as rt
+from ROOT import * 
+import sys,os
+import argparse
+import math
+import shutil
+sys.path.append('cfgs/')
+
+def getParameters(channel, interference, massBins, add):
+  with open("pickleParameters.txt","r") as ins:
+    for line in ins:
+      line = line.rstrip('\n')
+      line = " ".join(line.split())
+      a,b,c,d,e,f,g,h= line.split(" ")
+      channelString = a+"_"+b
+      if add:
+        if channelString == channel and c == massBins:
+          return (channel, e, f, g, h, c)
+      else:
+        if channelString == channel and c ==interference and d == massBins:
+          return (channel, f, g, h, 0.0, d) 
+  return
+
+  #tup1 = (channel, func.GetParameter(0), func.GetParameter(1), func.GetParameter(2));  
+
+def main():
+    parser = argparse.ArgumentParser(description='Physics Model Testing')
+    parser.add_argument("-c", dest = "config", default="")
+    parser.add_argument("-I", dest = "interference", default="")
+    parser.add_argument("--singlebin", dest = "singlebin",action="store_true", default = False)
+    parser.add_argument("-M", dest = "massBins", default="")
+    parser.add_argument("-a", help = "ADD", default = False)
+    tupVector = []
+    args = parser.parse_args()
+    configName = args.config
+    config =  __import__(configName)
+    interference = args.interference    
+    for channel in config.channels:
+      for index, massBins in enumerate(config.binning):
+        if index < len(config.binning): 
+          if index == len(config.binning)-1:
+            break;
+
+          tupVector.append(getParameters(channel, interference, str(massBins), args.a))
+        
+
+    tupVectorStringCalc = ''''''
+    tupVectorStringReturn = ''''''
+    for b in range(len(tupVector)):
+      tempCalc = '''
+        #'''+str(tupVector[b][0])+'''_'''+str(tupVector[b][len(tupVector[b])-1])+'''
+        self.modelBuilder.factory_('expr::calc'''+str(tupVector[b][0])+'''_'''+str(tupVector[b][len(tupVector[b])-1])+'''_Beta("'''+str(tupVector[b][1])+'''+'''+str(tupVector[b][2])+'''*@0+'''+str(tupVector[b][3])+'''*@0*@0+'''+str(tupVector[b][4])+'''*@0*@0*@0*@0",Beta)')
+      '''
+      if b == 0:  
+        tempReturn = '''
+        if bin == "'''+str(tupVector[b][0])+'''_'''+str(tupVector[b][len(tupVector[b])-1])+'''":
+            print "'''+str(tupVector[b][0])+'''_'''+str(tupVector[b][len(tupVector[b])-1])+''' '''+str(interference)+'''"
+            return 'calc'''+str(tupVector[b][0])+'''_'''+str(tupVector[b][len(tupVector[b])-1])+'''_Beta' if self.DC.isSignal[process] else 1
+      '''
+      else:
+        tempReturn = '''
+        elif bin == "'''+str(tupVector[b][0])+'''_'''+str(tupVector[b][len(tupVector[b])-1])+'''":
+            print "'''+str(tupVector[b][0])+'''_'''+str(tupVector[b][len(tupVector[b])-1])+''' '''+str(interference)+'''"
+            return 'calc'''+str(tupVector[b][0])+'''_'''+str(tupVector[b][len(tupVector[b])-1])+'''_Beta' if self.DC.isSignal[process] else 1
+      '''  
+      tupVectorStringCalc = tupVectorStringCalc+tempCalc
+      tupVectorStringReturn = tupVectorStringReturn+tempReturn
+    modelTemplate = '''
+from HiggsAnalysis.CombinedLimit.PhysicsModel import *
+
+class CIlambda(PhysicsModel):
+    def __init__(self):
+        PhysicsModel.__init__(self)
+
+    def doParametersOfInterest(self):
+        self.modelBuilder.doVar('Beta[0,0,1]')
+        self.modelBuilder.doSet('POI','Beta')
+        '''+tupVectorStringCalc+'''
+        self.modelBuilder.out.Print()
+
+    def getYieldScale(self,bin,process):
+        print bin, process
+        '''+tupVectorStringReturn+'''
+CIlambda = CIlambda()
+'''
+
+    f = open("LambdaCI%s.py"%(interference),"w")
+    f.write(modelTemplate)
+    f.close()
+    shutil.copy("LambdaCI%s.py"%(interference),"../python")
+
+main()
+    
